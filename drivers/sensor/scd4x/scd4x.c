@@ -4,29 +4,39 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
 #include <zephyr/device.h>
+#include <zephyr/drivers/i2c.h>
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/sensor.h>
-#include <zephyr/drivers/i2c.h>
-#include <zephyr/logging/log.h>
 #include <zephyr/sys/__assert.h>
+#include <zephyr/logging/log.h>
+#include <zephyr/pm/device.h>
 #include <zephyr/sys/byteorder.h>
 #include <zephyr/sys/crc.h>
-#include <zephyr/devicetree.h>
+// #include <zephyr/devicetree.h>
 
 #include "scd4x.h"
 
-enum sensor_attribute_scd4x {
-	SENSOR_ATTR_SCD4X_TEMPERATURE_OFFSET,
-	SENSOR_ATTR_SCD4X_SENSOR_ALTITUDE,
-	SENSOR_ATTR_SCD4X_AMBIENT_PRESSURE,
-	SENSOR_ATTR_SCD4X_AUTOMATIC_CALIB_ENABLE,
-	SENSOR_ATTR_SCD4X_SELF_CALIB_INITIAL_PERIOD,
-	SENSOR_ATTR_SCD4X_SELF_CALIB_STANDARD_PERIOD,
+// enum sensor_attribute_scd4x {
+// 	SENSOR_ATTR_SCD4X_TEMPERATURE_OFFSET,
+// 	SENSOR_ATTR_SCD4X_SENSOR_ALTITUDE,
+// 	SENSOR_ATTR_SCD4X_AMBIENT_PRESSURE,
+// 	SENSOR_ATTR_SCD4X_AUTOMATIC_CALIB_ENABLE,
+// 	SENSOR_ATTR_SCD4X_SELF_CALIB_INITIAL_PERIOD,
+// 	SENSOR_ATTR_SCD4X_SELF_CALIB_STANDARD_PERIOD,
+// };
+
+
+const struct cmds_t scd4x_cmds[] = {
+	{0x3646, 30},   {0x21B1, 0},  {0x3F86, 500}, {0xEC05, 1},   {0x241D, 1},     {0x2318, 1},
+	{0x2427, 1},    {0x2322, 1},  {0xE000, 1},   {0xE000, 1},   {0x362F, 400},   {0x2416, 1},
+	{0x2313, 1},    {0x21AC, 0},  {0xE4B8, 1},   {0x3615, 800}, {0x3639, 10000}, {0x3632, 1200},
+	{0x219D, 5000}, {0x2196, 50}, {0x36E0, 1},   {0x36F6, 30},  {0x2445, 1},     {0x2340, 1},
+	{0x244E, 1},    {0x234B, 1},
 };
 
-#include "scd4x.h"
-#include <scd4x.h>
+
 
 LOG_MODULE_REGISTER(SCD4X, CONFIG_SENSOR_LOG_LEVEL);
 

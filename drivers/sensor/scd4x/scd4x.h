@@ -4,9 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef ZEPHYR_DRIVERS_SENSOR_SCD4X_SCD4X_H_
-#define ZEPHYR_DRIVERS_SENSOR_SCD4X_SCD4X_H_
+#ifndef ZEPHYR_DRIVERS_SENSOR_SCD4X_H_
+#define ZEPHYR_DRIVERS_SENSOR_SCD4X_H_
 
+#include <zephyr/drivers/sensor.h>
+#include <zephyr/drivers/i2c.h>
 #include <zephyr/device.h>
 
 #define SCD4X_CMD_REINIT                         0
@@ -77,12 +79,86 @@ struct cmds_t {
 	uint16_t cmd_duration_ms;
 };
 
-const struct cmds_t scd4x_cmds[] = {
-	{0x3646, 30},   {0x21B1, 0},  {0x3F86, 500}, {0xEC05, 1},   {0x241D, 1},     {0x2318, 1},
-	{0x2427, 1},    {0x2322, 1},  {0xE000, 1},   {0xE000, 1},   {0x362F, 400},   {0x2416, 1},
-	{0x2313, 1},    {0x21AC, 0},  {0xE4B8, 1},   {0x3615, 800}, {0x3639, 10000}, {0x3632, 1200},
-	{0x219D, 5000}, {0x2196, 50}, {0x36E0, 1},   {0x36F6, 30},  {0x2445, 1},     {0x2340, 1},
-	{0x244E, 1},    {0x234B, 1},
-};
 
-#endif /* ZEPHYR_DRIVERS_SENSOR_SCD4X_SCD4X_H_ */
+
+ enum sensor_attribute_scd4x {
+     /* Offset temperature: Toffset_actual = Tscd4x – Treference + Toffset_previous
+      * 0 - 20°C
+      */
+     SENSOR_ATTR_SCD4X_TEMPERATURE_OFFSET = SENSOR_ATTR_PRIV_START,
+     /* Altidude of the sensor;
+      * 0 - 3000m
+      */
+     SENSOR_ATTR_SCD4X_SENSOR_ALTITUDE,
+     /* Ambient pressure in hPa
+      * 700 - 1200hPa
+      */
+     SENSOR_ATTR_SCD4X_AMBIENT_PRESSURE,
+     /* Set the current state (enabled: 1 / disabled: 0).
+      * Default: enabled.
+      */
+     SENSOR_ATTR_SCD4X_AUTOMATIC_CALIB_ENABLE,
+     /* Set the initial period for automatic self calibration correction in hours. Allowed values
+      * are integer multiples of 4 hours.
+      * Default: 44
+      */
+     SENSOR_ATTR_SCD4X_SELF_CALIB_INITIAL_PERIOD,
+     /* Set the standard period for automatic self calibration correction in hours. Allowed
+      * values are integer multiples of 4 hours. Default: 156
+      */
+     SENSOR_ATTR_SCD4X_SELF_CALIB_STANDARD_PERIOD,
+ };
+ 
+ /**
+  * @brief Performs a forced recalibration.
+  *
+  * Operate the SCD4x in the operation mode for at least 3 minutes in an environment with a
+  * homogeneous and constant CO2 concentration. Otherwise the recalibratioin will fail. The sensor
+  * must be operated at the voltage desired for the application when performing the FRC sequence.
+  *
+  * @param dev Pointer to the sensor device
+  * @param target_concentration Reference CO2 concentration.
+  * @param frc_correction Previous differences from the target concentration
+  *
+  * @return 0 if successful, negative errno code if failure.
+  */
+ int scd4x_forced_recalibration(const struct device *dev, uint16_t target_concentration,
+                    uint16_t *frc_correction);
+ 
+ /**
+  * @brief Performs a self test.
+  *
+  * The self_test command can be used as an end-of-line test to check the sensor functionality
+  *
+  * @param dev Pointer to the sensor device
+  *
+  * @return 0 if successful, negative errno code if failure.
+  */
+ int scd4x_self_test(const struct device *dev);
+ 
+ /**
+  * @brief Performs a self test.
+  *
+  * The persist_settings command can be used to save the actual configuration. This command
+  * should only be sent when persistence is required and if actual changes to the configuration have
+  * been made. The EEPROM is guaranteed to withstand at least 2000 write cycles
+  *
+  * @param dev Pointer to the sensor device
+  *
+  * @return 0 if successful, negative errno code if failure.
+  */
+ int scd4x_persist_settings(const struct device *dev);
+ 
+ /**
+  * @brief Performs a factory reset.
+  *
+  * The perform_factory_reset command resets all configuration settings stored in the EEPROM and
+  * erases the FRC and ASC algorithm history.
+  *
+  * @param dev Pointer to the sensor device
+  *
+  * @return 0 if successful, negative errno code if failure.
+  */
+ int scd4x_factory_reset(const struct device *dev);
+
+#endif /* ZEPHYR_DRIVERS_SENSOR_SCD4X_H_ */

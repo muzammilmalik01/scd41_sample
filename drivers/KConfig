@@ -1,1 +1,1 @@
-rsource "sensor/scd4x/KConfig"
+rsource "sensor/KConfig"

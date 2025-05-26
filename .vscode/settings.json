@@ -5,6 +5,7 @@
         "__assert.h": "c",
         "log.h": "c",
         "i2c.h": "c",
-        "scd4x.h": "c"
+        "scd4x.h": "c",
+        "crc.h": "c"
     }
 }
