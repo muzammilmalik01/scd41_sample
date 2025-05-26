@@ -12,7 +12,7 @@
 #endif
 
 
-const struct device *scd41 = DEVICE_DT_GET_ANY(DT_NODELABEL(scd4x));
+const struct device *scd41 = DEVICE_DT_GET_ANY(sensirion_scd41);
 
 int main (void){
        
@@ -29,7 +29,7 @@ int main (void){
                 sensor_channel_get(scd41, SENSOR_CHAN_HUMIDITY, &humi);
                 printk("CO2: %d.%06d ppm, Temperature: %d.%06d C, Humidity: %d.%06d %%\n",
                        co2.val1, co2.val2, temo.val1, temo.val2, humi.val1, humi.val2);
-                k_sleep(K_SECONDS(1000));
+                k_sleep(K_SECONDS(10));
         }
         return 0;
 }
